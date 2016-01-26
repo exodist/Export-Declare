@@ -5,10 +5,10 @@ subtest declare_meta => sub {
         Export::Declare::Meta->new($CLASS),
         {
             export      => [],
-            export_ok   => [qw/export exports export_tag export_gen export_magic import/],
+            export_ok   => [qw/export exports export_tag export_gen export_magic export_meta import/],
             export_fail => [],
             export_tags => {
-                ALL     => [qw/export exports export_tag export_gen export_magic import/],
+                ALL     => [qw/export exports export_tag export_gen export_magic export_meta import/],
                 FAIL    => [],
                 DEFAULT => [],
             },

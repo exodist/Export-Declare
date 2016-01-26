@@ -19,31 +19,37 @@ sub menu         { $_[0]->{menu} }
 
 sub new {
     my $class = shift;
-    my ($pkg) = @_;
+    my ($pkg, %params) = @_;
 
     croak "$class constructor requires a package name" unless $pkg;
 
-    return $STASH{$pkg} if $STASH{$pkg};
+    my $self = $STASH{$pkg} ||= do {
+        my $all     = [];
+        my $fail    = [];
+        my $default = [];
+        bless(
+            {
+                export       => $default,
+                export_ok    => $all,
+                export_fail  => $fail,
+                export_tags  => {DEFAULT => $default, ALL => $all, FAIL => $fail},
+                export_anon  => {},
+                export_gen   => {},
+                export_magic => {},
 
-    my $all     = [];
-    my $fail    = [];
-    my $default = [];
-    return $STASH{$pkg} = bless(
-        {
-            export       => $default,
-            export_ok    => $all,
-            export_fail  => $fail,
-            export_tags  => {DEFAULT => $default, ALL => $all, FAIL => $fail},
-            export_anon  => {},
-            export_gen   => {},
-            export_magic => {},
+                package => $pkg,
+                vars    => 0,
+                menu    => 0,
+            },
+            $class
+        );
+    };
 
-            package => $pkg,
-            vars    => 0,
-            menu    => 0,
-        },
-        $class
-    );
+    $self->inject_menu if $params{menu};
+    $self->inject_vars if $params{vars};
+    $self->inject_vars if $params{default} && !($self->{menu} || $self->{vars});
+
+    return $self;
 }
 
 sub inject_menu {
@@ -76,3 +82,123 @@ sub inject_vars {
 }
 
 1;
+
+__END__
+
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+Export::Declare::Meta - Meta-object to track a packages exports.
+
+=head1 DESCRIPTION
+
+This class represents all the export data for an exporter package. It can also
+inject that data into C<@EXPORT> and similar variables, or into an
+C<IMPORTER_MENU()> method as consumed by L<Importer>.
+
+=head1 SYNOPSYS
+
+    my $meta = Export::Declare::Meta->new($package);
+
+    $meta->inject_vars;
+
+    push @{$meta->export_ok} => qw/foo bar/;
+
+=head1 METHODS
+
+=over 4
+
+=item $meta = $CLASS->new($pkg)
+
+=item $meta = $CLASS->new($pkg, menu => 1, vars => 1, default => 1)
+
+Get (or create) an instance for the specified C<$pkg>. If C<< menu => 1 >> is
+used as an argument then C<IMPORTER_MENU()> will be injected. If C<< vars => 1
+>> is used then C<@EXPORT> and similar vars will be set. If C<< default => 1 >>
+is used then package cars will be injected, unless vars or menu have already
+been injected.
+
+=item $menta->inject_menu
+
+This will inject the C<IMPORTER_MENU()> function.
+
+=item $menta->inject_vars
+
+This will associate C<@EXPORT> and friends with the meta-data.
+
+=item $bool = $menta->vars
+
+Check if vars have been injected.
+
+=item $bool = $menta->menu
+
+Check if C<IMPORTER_MENU()> has been injected.
+
+=item $pkg = $menta->package
+
+Get the package associated with the instance.
+
+=item $arrayref = $menta->export
+
+Get the arrayref listing DEFAULT exports.
+
+=item $arrayref = $menta->export_ok
+
+Get the arrayref listing ALL exports.
+
+=item $arrayref = $menta->export_fail
+
+Get the arrayref listing exports that may fail.
+
+=item $hashref = $menta->export_tags
+
+Get the hashref with all the tags.
+
+=item $hashref = $menta->export_anon
+
+Get the hashref with anonymous exports.
+
+=item $hashref = $menta->export_gen
+
+Get the hashref with generated exports.
+
+=item $hashref = $menta->export_magic
+
+Get the hashref with export magic.
+
+=back
+
+=head1 SOURCE
+
+The source code repository for Export-Declare can be found at
+F<http://github.com/exodist/Export-Declare/>.
+
+=head1 MAINTAINERS
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
+
+=head1 AUTHORS
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright 2015 Chad Granum E<lt>exodist7@gmail.comE<gt>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See F<http://dev.perl.org/licenses/>
+
+=cut

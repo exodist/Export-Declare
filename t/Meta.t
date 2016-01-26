@@ -41,7 +41,7 @@ subtest construction_and_accessors => sub {
     );
 };
 
-subtest menu => sub {
+subtest inject_menu => sub {
     my $one = $CLASS->new('Fake::Exporter2');
     is($one->menu, 0, "no menu");
     ok(!Fake::Exporter2->can('IMPORTER_MENU'), "No IMPORTER_MENU");
@@ -98,6 +98,28 @@ subtest inject_vars => sub {
         },
         "Variables are linked to the meta-object"
     );
+};
+
+subtest default => sub {
+    my $one = $CLASS->new('Fake::Exporter4', default => 1);
+    ok($one->vars, "vars by default");
+    ok(!$one->menu, "no menu by default");
+
+    $one = $CLASS->new('Fake::Exporter5', vars => 1);
+    ok($one->vars, "vars selected");
+    ok(!$one->menu, "no menu");
+
+    $one = $CLASS->new('Fake::Exporter6', menu => 1);
+    ok($one->menu, "menu selected");
+    ok(!$one->vars, "no vars");
+
+    $one = $CLASS->new('Fake::Exporter7', menu => 1, vars => 1);
+    ok($one->menu, "menu selected");
+    ok($one->vars, "vars selected");
+
+    $one = $CLASS->new('Fake::Exporter7', menu => 1, vars => 1, default => 1);
+    ok($one->menu, "menu selected");
+    ok($one->vars, "vars selected");
 };
 
 done_testing;
