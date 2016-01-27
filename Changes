@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+    - List Test::Fatal in deps
+
 0.001     2016-01-26 15:54:34-08:00 America/Los_Angeles
 
     - Initial Release
