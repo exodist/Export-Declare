@@ -10,7 +10,7 @@ sub META() { 'Export::Declare::Meta' }
 
 BEGIN { META->new(__PACKAGE__)->inject_vars }
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 my %SIG_TO_TYPE = (
     '&' => 'CODE',
